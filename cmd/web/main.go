@@ -5,6 +5,8 @@
 
 package main
 
+import "git.cm/naiba/gopappy/router"
+
 func main() {
-	
+	router.RunWeb()
 }
