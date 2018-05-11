@@ -7,6 +7,8 @@ package gopappy
 
 var Platform = map[string]string{
 	"1": "金名网[4.cn]",
+	"2": "易名[ename.com]",
+	"3": "阿里云",
 }
 var TLDs = map[int]string{
 	1: "com",
@@ -49,13 +51,12 @@ type Domain struct {
 	Currency    string
 	BuyURL      string
 	Platform    string
-	Page        int
 }
 
 type Option struct {
 	Page      int    // 分页
 	TLDs      []int  //后缀
-	Tags      []int  //分类
+	Tag       int    //分类
 	Keyword   string //关键词
 	Exclude   string //排除
 	KwPos     int    //关键词位置

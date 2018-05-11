@@ -8,9 +8,10 @@ package router
 import (
 	"git.cm/naiba/gopappy"
 	"git.cm/naiba/gopappy/service"
-	"git.cm/naiba/gopappy/util/cn4"
 	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
+	"git.cm/naiba/gopappy/util/aliyun"
 )
 
 func init() {
@@ -19,16 +20,33 @@ func init() {
 
 func RunWeb() {
 	g := gin.Default()
+	g.Use(func(c *gin.Context) {
+		abort := func() {
+			c.String(http.StatusForbidden, "被安全策略拦截")
+			c.Abort()
+		}
+		if len(c.Request.UserAgent()) < 20 {
+			abort()
+		}
+		if len(c.Request.Header["Accept-Language"]) == 0 || len(c.Request.Header["Accept-Language"][0]) < 2 {
+			abort()
+		}
+		if len(c.Request.Header["Referer"]) == 0 || len(c.Request.Header["Referer"][0]) < 5 {
+			abort()
+		}
+	})
 	g.GET("/test", func(c *gin.Context) {
-		log.Println(cn4.Domains(gopappy.Option{
-			Page: 1,
+		log.Println(aliyun.Domains(gopappy.Option{
+			Page:    1,
+			Keyword: "gh",
+			KwPos:   1,
 			TLDs: []int{
 				1,
-				2,
 			},
-			Keyword: "livelive",
-			Order:   1,
-			Sort:    2,
+			Tag:       6,
+			MaxLength: 3,
+			Order:     1,
+			Sort:      1,
 		}))
 	})
 	g.Run("0.0.0.0:8000")

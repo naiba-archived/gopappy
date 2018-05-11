@@ -37,16 +37,19 @@ var Tags = map[string]string{
 }
 
 func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
+	d = make([]gopappy.Domain, 0)
+
 	r := gorequest.New()
-	r.Header["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
-	r.Header["Referer"] = "https://4.cn/buynow"
-	_, body, errs := r.Get(api + getURL(o)).End()
+	_, body, errs := r.Get(api + getURL(o)).
+		Set("Referer", "https://4.cn/buynow").
+		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").
+		Set("X-Forward-For", com.RandomIP()).
+		Set("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6").
+		End()
 	if len(errs) != 0 {
 		err = errs[0]
 		return
 	}
-
-	d = make([]gopappy.Domain, 0)
 
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
 	if err != nil {
@@ -89,7 +92,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 }
 
 func getURL(o gopappy.Option) string {
-	s := "/search/1"
+	s := "/search/1/perpage/20"
 	//排序
 	if o.Order == 1 {
 		s += "/so/price"
@@ -124,10 +127,8 @@ func getURL(o gopappy.Option) string {
 		}
 	}
 	//分类
-	if len(o.Tags) > 0 {
-		for _, tag := range o.Tags {
-			s += "/tags/" + Tags[gopappy.Tags[tag]]
-		}
+	if o.Tag > 0 {
+		s += "/tags/" + Tags[gopappy.Tags[o.Tag]]
 	}
 	//价格
 	if o.MaxPrice > 0 {
