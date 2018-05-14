@@ -20,5 +20,5 @@ func RunWeb() {
 	g.Use(middleware.Cross)
 	g.Use(middleware.Safe)
 	serveAPI(g)
-	g.Run("0.0.0.0:3010")
+	g.Run("127.0.0.1:3010")
 }
