@@ -40,7 +40,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 	d = make([]gopappy.Domain, 0)
 
 	r := gorequest.New()
-	_, body, errs := r.Get(api + getURL(o)).
+	_, body, errs := r.Get(api+getURL(o)).
 		Set("Referer", "https://4.cn/buynow").
 		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").
 		Set("X-Forward-For", com.RandomIP()).
@@ -59,7 +59,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 	table := doc.Find("table.grid tbody").First()
 	table.Find("tr").Each(func(i int, tr *goquery.Selection) {
 		var id gopappy.Domain
-		id.Platform = "1"
+		id.Platform = 1
 		tr.Find("td").Each(func(j int, td *goquery.Selection) {
 			switch j {
 			case 2:
@@ -85,7 +85,9 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 				}
 			}
 		})
-		d = append(d, id)
+		if len(id.Name) > 0 {
+			d = append(d, id)
+		}
 	})
 
 	return

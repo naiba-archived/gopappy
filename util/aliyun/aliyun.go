@@ -8,9 +8,9 @@ package aliyun
 import (
 	"git.cm/naiba/gopappy"
 	"github.com/naiba/com"
-	"strconv"
 	"github.com/parnurzeal/gorequest"
 	"github.com/pkg/errors"
+	"strconv"
 	"strings"
 )
 
@@ -30,7 +30,7 @@ type aliyunResult struct {
 	Data struct {
 		PageResult struct {
 			CurrentPageNum int
-			Data []struct {
+			Data           []struct {
 				DomainName   string
 				Price        string
 				Introduction string
@@ -43,7 +43,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 	d = make([]gopappy.Domain, 0)
 	r := gorequest.New()
 	var res aliyunResult
-	_, body, errs := r.Get(api + getURL(o)).
+	_, body, errs := r.Get(api+getURL(o)).
 		Set("Referer", "https://mi.aliyun.com/").
 		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").
 		Set("X-Forward-For", com.RandomIP()).
@@ -60,7 +60,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 	}
 	for _, ali := range res.Data.PageResult.Data {
 		var id gopappy.Domain
-		id.Platform = "3"
+		id.Platform = 3
 		id.Currency = "CNY"
 		id.Price, _ = strconv.Atoi(strings.Replace(ali.Price, ",", "", -1))
 		id.Description = ali.Introduction
@@ -72,7 +72,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 }
 
 func getURL(o gopappy.Option) string {
-	s := "searchIntro=false&pageSize=20&fetchSearchTotal=true&token=tdomain-aliyun-com:" + com.RandomString(32)
+	s := "productType=2&searchIntro=false&pageSize=20&fetchSearchTotal=true&token=tdomain-aliyun-com:" + com.RandomString(32)
 	if o.Page > 1 {
 		s += "&currentPage=" + strconv.Itoa(o.Page)
 	}
