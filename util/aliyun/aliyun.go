@@ -10,7 +10,6 @@ import (
 	"github.com/naiba/com"
 	"github.com/parnurzeal/gorequest"
 	"github.com/pkg/errors"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -32,7 +31,7 @@ type aliyunResult struct {
 	Data struct {
 		PageResult struct {
 			CurrentPageNum int
-			Data           []struct {
+			Data []struct {
 				DomainName   string
 				Price        string
 				Introduction string
@@ -45,8 +44,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 	d = make([]gopappy.Domain, 0)
 	r := gorequest.New().Timeout(time.Second * 4)
 	var res aliyunResult
-	log.Println(api + getURL(o))
-	_, body, errs := r.Get(api+getURL(o)).
+	_, body, errs := r.Get(api + getURL(o)).
 		Set("Referer", "https://mi.aliyun.com/").
 		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").
 		Set("X-Forward-For", com.RandomIP()).
