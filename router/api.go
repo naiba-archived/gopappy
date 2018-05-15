@@ -56,6 +56,9 @@ func search(c *gin.Context) {
 	wg.Wait()
 	convertPrices(all.D)
 	sort.Sort(gopappy.SortDomain(all.D))
+	if o.Sort != 1 {
+		sort.Reverse(gopappy.SortDomain(all.D))
+	}
 	c.JSON(http.StatusOK, all.D)
 }
 func convertPrices(ds []gopappy.Domain) {
