@@ -10,8 +10,10 @@ import (
 	"github.com/naiba/com"
 	"github.com/parnurzeal/gorequest"
 	"github.com/pkg/errors"
+	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const api = "https://domainapi.aliyun.com/onsale/search?"
@@ -41,8 +43,9 @@ type aliyunResult struct {
 
 func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 	d = make([]gopappy.Domain, 0)
-	r := gorequest.New()
+	r := gorequest.New().Timeout(time.Second * 4)
 	var res aliyunResult
+	log.Println(api + getURL(o))
 	_, body, errs := r.Get(api+getURL(o)).
 		Set("Referer", "https://mi.aliyun.com/").
 		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").
@@ -73,7 +76,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 
 func getURL(o gopappy.Option) string {
 	s := "productType=2&searchIntro=false&pageSize=20&fetchSearchTotal=true&token=tdomain-aliyun-com:" + com.RandomString(32)
-	if o.Page > 1 {
+	if o.Page > 0 {
 		s += "&currentPage=" + strconv.Itoa(o.Page)
 	}
 	if len(o.TLDs) > 0 {
@@ -121,7 +124,7 @@ func getURL(o gopappy.Option) string {
 			s += "&sortType=1"
 		}
 	}
-	if o.Tag > 1 {
+	if o.Tag > 0 {
 		s += "&constitute=" + Tags[gopappy.Tags[o.Tag]]
 	}
 	return s

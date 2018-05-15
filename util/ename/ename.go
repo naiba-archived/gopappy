@@ -10,8 +10,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/naiba/com"
 	"github.com/parnurzeal/gorequest"
+	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var TLDs = map[string]string{
@@ -40,7 +42,8 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, e error) {
 	d = make([]gopappy.Domain, 0)
 
 	appended := getURL(o)
-	r := gorequest.New()
+	r := gorequest.New().Timeout(time.Second * 4)
+	log.Println(api + appended)
 	_, body, errs := r.Get(api+appended).
 		Set("Referer", api+"/search"+appended).
 		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").
@@ -120,10 +123,10 @@ func getURL(o gopappy.Option) string {
 	if o.MaxLength > 0 {
 		s += "&domainlenend=" + strconv.Itoa(o.MaxLength)
 	}
-	if o.Tag > 1 {
+	if o.Tag > 0 {
 		s += "&domaingroup=" + Tags[gopappy.Tags[o.Tag]]
 	}
-	if o.Page > 1 {
+	if o.Page > 0 {
 		s += "&page=" + strconv.Itoa(o.Page)
 	}
 	s += "&pageSize=20"

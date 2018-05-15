@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sort"
+	"sync"
 )
 
 func serveAPI(g *gin.Engine) {
@@ -30,14 +31,32 @@ func search(c *gin.Context) {
 		c.JSON(http.StatusForbidden, err)
 		return
 	}
-	en, _ := ename.Domains(o)
-	cn, _ := cn4.Domains(o)
-	ali, _ := aliyun.Domains(o)
-	en = append(en, cn...)
-	en = append(en, ali...)
-	convertPrices(en)
-	sort.Sort(gopappy.SortDomain(en))
-	c.JSON(http.StatusOK, en)
+	var wg sync.WaitGroup
+	funks := []func(option gopappy.Option) ([]gopappy.Domain, error){
+		ename.Domains,
+		cn4.Domains,
+		aliyun.Domains,
+	}
+	type SafeDomains struct {
+		D []gopappy.Domain
+		L sync.RWMutex
+	}
+	var all SafeDomains
+	all.D = make([]gopappy.Domain, 0)
+	for _, f := range funks {
+		wg.Add(1)
+		go func(f func(option gopappy.Option) ([]gopappy.Domain, error)) {
+			d, _ := f(o)
+			all.L.Lock()
+			all.D = append(all.D, d...)
+			all.L.Unlock()
+			wg.Done()
+		}(f)
+	}
+	wg.Wait()
+	convertPrices(all.D)
+	sort.Sort(gopappy.SortDomain(all.D))
+	c.JSON(http.StatusOK, all.D)
 }
 func convertPrices(ds []gopappy.Domain) {
 	for i, d := range ds {

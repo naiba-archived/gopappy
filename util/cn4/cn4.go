@@ -12,6 +12,7 @@ import (
 	"github.com/parnurzeal/gorequest"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const api = "https://4.cn/buynow/index"
@@ -39,7 +40,7 @@ var Tags = map[string]string{
 func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
 	d = make([]gopappy.Domain, 0)
 
-	r := gorequest.New()
+	r := gorequest.New().Timeout(time.Second * 4)
 	_, body, errs := r.Get(api+getURL(o)).
 		Set("Referer", "https://4.cn/buynow").
 		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").
@@ -114,18 +115,18 @@ func getURL(o gopappy.Option) string {
 	if len(o.Keyword) > 0 {
 		s += "/keyword/" + com.URLEncode(o.Keyword)
 		if o.KwPos == 0 {
-			s += "/kws2/1/kws/1"
+			s += "/kws/1"
 		} else {
-			s += "/kws2/1/kws/" + strconv.Itoa(o.KwPos)
+			s += "/kws/" + strconv.Itoa(1+o.KwPos)
 		}
 	}
 	//排除
 	if len(o.Exclude) > 0 {
 		s += "/exclude/" + com.URLEncode(o.Exclude)
 		if o.ExPos == 0 {
-			s += "/ekws2/1/ekws/1"
+			s += "/ekws/1"
 		} else {
-			s += "/ekws2/1/ekws/" + strconv.Itoa(o.ExPos)
+			s += "/ekws/" + strconv.Itoa(o.ExPos+1)
 		}
 	}
 	//分类
