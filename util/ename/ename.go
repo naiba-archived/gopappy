@@ -6,13 +6,14 @@
 package ename
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"git.cm/naiba/gopappy"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/naiba/com"
 	"github.com/parnurzeal/gorequest"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var TLDs = map[string]string{
@@ -33,6 +34,12 @@ var Tags = map[string]string{
 	"双拼":  "17",
 	"三拼":  "18",
 	"杂米":  "13",
+	"NNL": "112",
+	"NLN": "121",
+	"NLL": "122",
+	"LLN": "221",
+	"LNL": "212",
+	"LNN": "211",
 }
 
 const api = "https://auction.ename.com/tao"
@@ -122,7 +129,11 @@ func getURL(o gopappy.Option) string {
 		s += "&domainlenend=" + strconv.Itoa(o.MaxLength)
 	}
 	if o.Tag > 0 {
-		s += "&domaingroup=" + Tags[gopappy.Tags[o.Tag]]
+		if o.Tag < 8 {
+			s += "&domaingroup=" + Tags[gopappy.Tags[o.Tag]]
+		} else {
+			s += "&domaingroup=15&groupTwo[]=" + Tags[gopappy.Tags[o.Tag]]
+		}
 	}
 	if o.Page > 0 {
 		s += "&page=" + strconv.Itoa(o.Page)

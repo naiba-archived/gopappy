@@ -6,13 +6,14 @@
 package aliyun
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"git.cm/naiba/gopappy"
 	"github.com/naiba/com"
 	"github.com/parnurzeal/gorequest"
 	"github.com/pkg/errors"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const api = "https://domainapi.aliyun.com/onsale/search?"
@@ -24,6 +25,12 @@ var Tags = map[string]string{
 	"双拼":  "1207002",
 	"三拼":  "1207003",
 	"杂米":  "13",
+	"NNL": "1302001",
+	"NLN": "1302006",
+	"NLL": "1302004",
+	"LLN": "1302003",
+	"LNL": "1302005",
+	"LNN": "1302002",
 }
 
 type aliyunResult struct {

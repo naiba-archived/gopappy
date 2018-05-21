@@ -6,13 +6,14 @@
 package cn4
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"git.cm/naiba/gopappy"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/naiba/com"
 	"github.com/parnurzeal/gorequest"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const api = "https://4.cn/buynow/index"
@@ -35,6 +36,12 @@ var Tags = map[string]string{
 	"双拼":  "81",
 	"三拼":  "82",
 	"杂米":  "type_4",
+	"NNL": "78,266",
+	"NLN": "78,267",
+	"NLL": "78,268",
+	"LLN": "78,269",
+	"LNL": "78,270",
+	"LNN": "78,271",
 }
 
 func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {

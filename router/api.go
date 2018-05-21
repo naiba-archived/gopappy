@@ -7,14 +7,15 @@ package router
 
 import (
 	"fmt"
+	"net/http"
+	"sort"
+	"sync"
+
 	"git.cm/naiba/gopappy"
 	"git.cm/naiba/gopappy/util/aliyun"
 	"git.cm/naiba/gopappy/util/cn4"
 	"git.cm/naiba/gopappy/util/ename"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"sort"
-	"sync"
 )
 
 func serveAPI(g *gin.Engine) {
@@ -80,14 +81,20 @@ func convertPrices(ds []gopappy.Domain) {
 }
 
 func params(c *gin.Context) {
+	type TLD struct {
+		ID  int    `json:"id"`
+		TLD string `json:"tld"`
+	}
 	type Params struct {
 		Platforms map[int]string `json:"platforms"`
-		TLDs      map[int]string `json:"tlds"`
-		Tags      map[int]string `json:"tags"`
+		TLDs      []TLD          `json:"tlds"`
 	}
-	c.JSON(http.StatusOK, Params{
+	var p = Params{
 		Platforms: gopappy.Platform,
-		TLDs:      gopappy.TLDs,
-		Tags:      gopappy.Tags,
-	})
+	}
+	p.TLDs = make([]TLD, 0)
+	for id, tld := range gopappy.TLDs {
+		p.TLDs = append(p.TLDs, TLD{ID: id, TLD: tld})
+	}
+	c.JSON(http.StatusOK, p)
 }
