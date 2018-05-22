@@ -6,8 +6,9 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Safe(c *gin.Context) {
@@ -17,11 +18,14 @@ func Safe(c *gin.Context) {
 	}
 	if len(c.Request.UserAgent()) < 20 {
 		abort()
+		return
 	}
 	if len(c.Request.Header["Accept-Language"]) == 0 || len(c.Request.Header["Accept-Language"][0]) < 2 {
 		abort()
+		return
 	}
 	if len(c.Request.Header["Referer"]) == 0 || len(c.Request.Header["Referer"][0]) < 5 {
 		abort()
+		return
 	}
 }

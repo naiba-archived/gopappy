@@ -100,7 +100,7 @@ func getCachedDomains(hasKey, cacheKey string, o gopappy.Option, fn func(option 
 	domains := make([]gopappy.Domain, 0)
 	// 是否有下一页
 	_, has := gopappy.Ch.Get("H" + hasKey)
-	log.Println(hasKey, has)
+	log.Println("H"+hasKey, has)
 	if has {
 		return domains
 	}

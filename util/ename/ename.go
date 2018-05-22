@@ -1,11 +1,12 @@
-/*
- * Copyright (c) 2018, 奶爸<1@5.nu>
- * All rights reserved.
- */
+// Copyright (c) 2018 奶爸(1@5.nu)
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
 
 package ename
 
 import (
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -49,6 +50,7 @@ func Domains(o gopappy.Option) (d []gopappy.Domain, e error) {
 
 	appended := getURL(o)
 	r := gorequest.New().Timeout(time.Second * 4)
+	log.Println("ename", api+appended)
 	_, body, errs := r.Get(api+appended).
 		Set("Referer", api+"/search"+appended).
 		Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36").

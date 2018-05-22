@@ -1,3 +1,8 @@
+// Copyright (c) 2018 奶爸(1@5.nu)
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
 package gopappy
 
 import (
