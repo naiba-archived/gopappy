@@ -7,9 +7,12 @@ package router
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"sync"
+	"time"
 
 	"git.cm/naiba/gopappy"
 	"git.cm/naiba/gopappy/util/aliyun"
@@ -33,10 +36,10 @@ func search(c *gin.Context) {
 		return
 	}
 	var wg sync.WaitGroup
-	funks := []func(option gopappy.Option) ([]gopappy.Domain, error){
-		ename.Domains,
-		cn4.Domains,
-		aliyun.Domains,
+	funks := map[string]func(option gopappy.Option) ([]gopappy.Domain, error){
+		"ename": ename.Domains,
+		"cn4":   cn4.Domains,
+		"ali":   aliyun.Domains,
 	}
 	type SafeDomains struct {
 		D []gopappy.Domain
@@ -44,15 +47,21 @@ func search(c *gin.Context) {
 	}
 	var all SafeDomains
 	all.D = make([]gopappy.Domain, 0)
-	for _, f := range funks {
+	// genCacheKey
+	o.Page--
+	hasKey := genCacheKey(o)
+	o.Page++
+	cacheKey := genCacheKey(o)
+	// range get domains
+	for p, f := range funks {
 		wg.Add(1)
-		go func(f func(option gopappy.Option) ([]gopappy.Domain, error)) {
-			d, _ := f(o)
+		go func(p string, f func(option gopappy.Option) ([]gopappy.Domain, error)) {
+			d := getCachedDomains(p+hasKey, p+cacheKey, o, f)
 			all.L.Lock()
 			all.D = append(all.D, d...)
 			all.L.Unlock()
 			wg.Done()
-		}(f)
+		}(p, f)
 	}
 	wg.Wait()
 	convertPrices(all.D)
@@ -61,8 +70,69 @@ func search(c *gin.Context) {
 	} else {
 		sort.Sort(gopappy.SortDomain(all.D))
 	}
+	gopappy.StatInstance.Search++
+	gopappy.StatInstance.Domain += int64(len(all.D))
 	c.JSON(http.StatusOK, all.D)
 }
+
+func params(c *gin.Context) {
+	type TLD struct {
+		ID  int    `json:"id,omitempty"`
+		TLD string `json:"tld,omitempty"`
+	}
+	type Params struct {
+		Platforms map[int]string `json:"platforms,omitempty"`
+		TLDs      []TLD          `json:"tlds,omitempty"`
+		Stat      *gopappy.Stat  `json:"stat,omitempty"`
+	}
+	var p = Params{
+		Platforms: gopappy.Platform,
+		Stat:      gopappy.StatInstance,
+	}
+	p.TLDs = make([]TLD, 0)
+	for id, tld := range gopappy.TLDs {
+		p.TLDs = append(p.TLDs, TLD{ID: id, TLD: tld})
+	}
+	c.JSON(http.StatusOK, p)
+}
+
+func getCachedDomains(hasKey, cacheKey string, o gopappy.Option, fn func(option gopappy.Option) ([]gopappy.Domain, error)) []gopappy.Domain {
+	domains := make([]gopappy.Domain, 0)
+	// 是否有下一页
+	_, has := gopappy.Ch.Get("H" + hasKey)
+	log.Println(hasKey, has)
+	if has {
+		return domains
+	}
+	// 取缓存或重新抓取
+	tmp, has := gopappy.Ch.Get(cacheKey)
+	log.Println(cacheKey, has)
+	if has {
+		return tmp.([]gopappy.Domain)
+	} else {
+		var err error
+		domains, err = fn(o)
+		if err == nil {
+			gopappy.Ch.Set(cacheKey, domains, time.Minute*30)
+			if len(domains) < 20 {
+				gopappy.Ch.Set("H"+cacheKey, false, time.Minute*30)
+			}
+		}
+		return domains
+	}
+}
+
+func genCacheKey(o gopappy.Option) string {
+	cacheKey := fmt.Sprintf("EX%sEXP%dKW%sKWP%dML%dMP%dIL%dIP%dOD%dS%dP%dT%dTD", o.Exclude, o.ExPos,
+		o.Keyword, o.KwPos, o.MaxLength, o.MaxPrice, o.MinLength, o.MinPrice,
+		o.Order, o.Sort, o.Page, o.Tag)
+	sort.Sort(sort.IntSlice(o.TLDs))
+	for _, tld := range o.TLDs {
+		cacheKey += strconv.Itoa(tld) + ","
+	}
+	return cacheKey
+}
+
 func convertPrices(ds []gopappy.Domain) {
 	for i, d := range ds {
 		if d.Currency != "CNY" && len(d.Currency) > 0 {
@@ -78,23 +148,4 @@ func convertPrices(ds []gopappy.Domain) {
 		}
 		ds[i] = d
 	}
-}
-
-func params(c *gin.Context) {
-	type TLD struct {
-		ID  int    `json:"id"`
-		TLD string `json:"tld"`
-	}
-	type Params struct {
-		Platforms map[int]string `json:"platforms"`
-		TLDs      []TLD          `json:"tlds"`
-	}
-	var p = Params{
-		Platforms: gopappy.Platform,
-	}
-	p.TLDs = make([]TLD, 0)
-	for id, tld := range gopappy.TLDs {
-		p.TLDs = append(p.TLDs, TLD{ID: id, TLD: tld})
-	}
-	c.JSON(http.StatusOK, p)
 }

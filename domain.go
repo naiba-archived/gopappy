@@ -6,9 +6,9 @@
 package gopappy
 
 var Platform = map[int]string{
-	1: "金名网[4.cn]",
-	2: "易名[ename.com]",
-	3: "阿里云",
+	1: "金名",
+	2: "易名",
+	3: "阿里",
 }
 var TLDs = map[int]string{
 	1: "com",

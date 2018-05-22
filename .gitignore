@@ -9,6 +9,7 @@ _obj
 _test
 .idea
 cmd/web/web
+cmd/web/resource/data
 
 # Architecture specific extensions/prefixes
 *.[568vq]

@@ -7,13 +7,30 @@ package gopappy
 
 import (
 	"encoding/json"
-	"github.com/naiba/com"
 	"io/ioutil"
+	"log"
+	"time"
+
+	"github.com/naiba/com"
 )
 
+var StatInstance *Stat
+
+func init() {
+	if StatInstance == nil {
+		StatInstance = new(Stat)
+		StatInstance.Read()
+	}
+	go func() {
+		time.Sleep(time.Minute * 10)
+		StatInstance.Save()
+		log.Println("stat auto save", StatInstance)
+	}()
+}
+
 type Stat struct {
-	Search int64
-	Domain int64
+	Search int64 `json:"search"`
+	Domain int64 `json:"domain"`
 }
 
 const filePath = "resource/data/stat.json"

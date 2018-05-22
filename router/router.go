@@ -7,12 +7,10 @@ package router
 
 import (
 	"git.cm/naiba/gopappy/middleware"
-	"git.cm/naiba/gopappy/service"
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	service.Init()
 }
 
 func RunWeb() {
