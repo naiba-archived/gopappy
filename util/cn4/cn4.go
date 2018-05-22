@@ -36,12 +36,12 @@ var Tags = map[string]string{
 	"双拼":  "81",
 	"三拼":  "82",
 	"杂米":  "type_4",
-	"NNL": "78,266",
-	"NLN": "78,267",
-	"NLL": "78,268",
-	"LLN": "78,269",
-	"LNL": "78,270",
-	"LNN": "78,271",
+	"NNL": "78%2C266",
+	"NLN": "78%2C267",
+	"NLL": "78%2C268",
+	"LLN": "78%2C269",
+	"LNL": "78%2C270",
+	"LNN": "78%2C271",
 }
 
 func Domains(o gopappy.Option) (d []gopappy.Domain, err error) {
